@@ -1,0 +1,12 @@
+reward: "crate give p Vote 1 [player]"
+
+title:
+  top: "&a&l✔ Voted!"
+  bottom: "Received $%s &e(%s/5 daily votes)"
+
+chat:
+  prefix: "&d&lVotes: &7"
+  message: "%sYou've maintained your streak, which is now %s %s long. Great work!"
+
+leaderboard: "&d#%s &8- &7%s: &a%s"
+streak: "%sYour voting streak is %s %s long."

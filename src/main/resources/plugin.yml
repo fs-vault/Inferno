@@ -1,0 +1,12 @@
+name: Inferno
+version: 1.0
+author: TechToolbox (@nkomarn)
+main: xyz.nkomarn.Inferno.Inferno
+description: A vote listener designed to encourage people to consistently vote.
+website: https://github.com/firestartermc/Phase
+api-version: 1.15
+depend: ['Vault', 'PlaceholderAPI']
+
+commands:
+  streak:
+    description: "View your voting streak!"

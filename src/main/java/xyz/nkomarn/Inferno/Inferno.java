@@ -38,8 +38,8 @@ public class Inferno extends JavaPlugin {
 
         // Register placeholders
         new StreakPlaceholders(this).register();
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this,
-                new StreakTask(), 0L, 300 * 20);
+        Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(this,
+                new StreakTask(), 0L, 120 * 20);
     }
     
     public void onDisable() { }

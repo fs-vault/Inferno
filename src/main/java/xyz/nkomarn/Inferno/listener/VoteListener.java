@@ -63,22 +63,34 @@ public class VoteListener implements Listener {
                         player.sendTitle(ChatColor.translateAlternateColorCodes('&', Config.getString("title.top")),
                                 ChatColor.translateAlternateColorCodes('&', String.format(
                                         Config.getString("title.bottom"), money, (votes + 1)
-                                )));
-                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
+                                ))); // TODo chat messages
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
 
-                        if (votes + 1 == 5) {
-                            statement = connection.prepareStatement("UPDATE inferno SET last_vote=?, level=?, votes='0' WHERE uuid=?");
+                        if (votes + 1 == 3) {
+                            // Give key after 3 votes
+                            statement = connection.prepareStatement("UPDATE inferno SET last_vote=?, votes=? WHERE uuid=?");
                             statement.setLong(1, System.currentTimeMillis());
-                            statement.setInt(2, level + 1);
+                            statement.setInt(2, votes + 1);
                             statement.setString(3, player.getUniqueId().toString());
                             statement.executeUpdate();
                             statement.close();
 
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
+                                    "%sYou've received a crate key- vote 2 more times to level up your streak.", Config.getPrefix()
+                            )));
                             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                             Bukkit.getScheduler().runTask(Inferno.getInferno(), () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                                     Config.getString("reward").replace("[player]", player.getName())));
+                        } else if (votes + 1 == 5) {
+                            statement = connection.prepareStatement("UPDATE inferno SET level=?, votes=0 WHERE uuid=?");
+                            statement.setInt(1, level + 1);
+                            statement.setString(2, player.getUniqueId().toString());
+                            statement.executeUpdate();
+                            statement.close();
 
-                            // "Day" or "days"
+                            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+
+                            // Level up player's streak after 5 votes
                             String dayString;
                             int nextLevel = level + 1;
                             if (nextLevel == 1) dayString = "day";

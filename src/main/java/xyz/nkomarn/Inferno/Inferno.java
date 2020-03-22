@@ -10,6 +10,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.nkomarn.Inferno.command.SendVoteCommand;
 import xyz.nkomarn.Inferno.command.StreakCommand;
 import xyz.nkomarn.Inferno.listener.PlayerJoinListener;
 import xyz.nkomarn.Inferno.listener.VoteListener;
@@ -28,7 +29,9 @@ public class Inferno extends JavaPlugin {
         inferno = this;
         saveDefaultConfig();
         loadDatabase();
+
         getCommand("streak").setExecutor(new StreakCommand());
+        getCommand("sendvote").setExecutor(new SendVoteCommand());
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new VoteListener(), this);
 

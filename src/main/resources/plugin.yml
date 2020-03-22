@@ -9,4 +9,6 @@ depend: ['Vault', 'PlaceholderAPI']
 
 commands:
   streak:
-    description: "View your voting streak!"
+    description: "View your voting streak."
+  sendvote:
+    description: "Sends a fake vote with a username."

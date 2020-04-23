@@ -1,14 +1,18 @@
 name: Inferno
-version: 1.0
+version: 2.0
 author: TechToolbox (@nkomarn)
 main: xyz.nkomarn.Inferno.Inferno
 description: A vote listener designed to encourage people to consistently vote.
-website: https://github.com/firestartermc/Phase
+website: https://firestartermc.com/opensource
 api-version: 1.15
-depend: ['Vault', 'PlaceholderAPI']
+depend: ['Kerosene', 'HolographicDisplays', 'Votifier']
 
 commands:
   streak:
     description: "View your voting streak."
   sendvote:
     description: "Sends a fake vote with a username."
+
+permissions:
+  inferno.sendvote:
+    default: op

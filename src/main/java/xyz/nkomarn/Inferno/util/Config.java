@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
-    final static String prefix = getString("chat.prefix");
-
     /**
      * Fetches the message prefix from the configuration
      */
     public static String getPrefix() {
-        return prefix;
+        return getString("chat.prefix");
     }
 
     /**

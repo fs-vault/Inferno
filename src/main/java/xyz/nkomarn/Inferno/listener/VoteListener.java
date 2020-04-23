@@ -7,9 +7,10 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 import xyz.nkomarn.Inferno.Inferno;
 import xyz.nkomarn.Inferno.util.Config;
+import xyz.nkomarn.Kerosene.data.LocalStorage;
+import xyz.nkomarn.Kerosene.util.EconomyUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,127 +21,77 @@ import java.util.concurrent.TimeUnit;
 public class VoteListener implements Listener {
     @EventHandler
     public void onVote(VotifierEvent event) {
-        final String username = event.getVote().getUsername();
-        new BukkitRunnable() {
-            public void run() {
-                try {
-                    final Connection connection = Inferno.getHandler().open();
-                    if (connection == null) {
-                        Inferno.getInferno().getLogger().warning(String.format(
-                                "Database error- can't add %s's vote to the database.", username
-                        ));
-                        return;
-                    }
+        Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
+            try (Connection connection = LocalStorage.getConnection()) {
+                Inferno.getInferno().getLogger().info(String.format("Received a vote from %s.", event.getVote().getUsername()));
+                final Player player = Bukkit.getServer().getPlayer(event.getVote().getUsername());
+                if (player == null) return;
 
-                    Player player = Bukkit.getServer().getPlayer(username);
-                    if (player == null) return;
-
-                    PreparedStatement statement = connection.prepareStatement("SELECT last_vote, level, votes " +
-                            "FROM inferno WHERE uuid=?");
+                try (PreparedStatement statement = connection.prepareStatement("SELECT last_vote, level, votes " +
+                        "FROM votes WHERE uuid=?")) {
                     statement.setString(1, player.getUniqueId().toString());
+                    try (ResultSet result = statement.executeQuery()) {
+                        if (result.next()) {
+                            final long lastVoteTime = result.getLong(1);
+                            final int streakLevel = result.getInt(2);
+                            final int totalVotes = result.getInt(3);
 
-                    final ResultSet result = statement.executeQuery();
-                    if (result.next()) {
-                        long lastVoted = result.getLong(1);
-                        int level = result.getInt(2);
-                        int votes = result.getInt(3);
-                        result.close();
-                        statement.close();
+                            long daysSinceLastVote = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() -
+                                    lastVoteTime);
+                            if (daysSinceLastVote >= 2) Inferno.resetStreak(connection, player);
 
-                        long days = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - lastVoted);
-
-                        if (days >= 2) {
-                            votes = 0;
-                            statement = connection.prepareStatement("UPDATE inferno SET last_vote=?, level='0', votes='0' WHERE uuid=?");
-                            statement.setLong(1, System.currentTimeMillis());
-                            statement.setString(2, player.getUniqueId().toString());
-                            statement.executeUpdate();
-                            statement.close();
-                        }
-
-                        // Amount to reward the player for voting
-                        int money = 10 + (getLevel(player) * 5);
-                        player.sendTitle(ChatColor.translateAlternateColorCodes('&', Config.getString("title.top")),
-                                ChatColor.translateAlternateColorCodes('&', String.format(
-                                        Config.getString("title.bottom"), money, (votes + 1)
-                                ))); // TODo chat messages
-                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
-
-                        if (votes + 1 == 3) {
-                            // Give key after 3 votes
-                            statement = connection.prepareStatement("UPDATE inferno SET last_vote=?, votes=? WHERE uuid=?");
-                            statement.setLong(1, System.currentTimeMillis());
-                            statement.setInt(2, votes + 1);
-                            statement.setString(3, player.getUniqueId().toString());
-                            statement.executeUpdate();
-                            statement.close();
-
+                            final long monetaryReward = (streakLevel * 5) + 10;
+                            EconomyUtil.deposit(player, monetaryReward);
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
-                                    "%sYou've received a crate key- vote 2 more times to level up your streak.", Config.getPrefix()
+                                    "%sYou've received &d$%s &7for voting (&d%s/5&7 daily votes- streak level &d%s&7).",
+                                    Config.getPrefix(), monetaryReward, (totalVotes + 1), streakLevel
                             )));
-                            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-                            Bukkit.getScheduler().runTask(Inferno.getInferno(), () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                                    Config.getString("reward").replace("[player]", player.getName())));
-                        } else if (votes + 1 == 5) {
-                            statement = connection.prepareStatement("UPDATE inferno SET level=?, votes=0 WHERE uuid=?");
-                            statement.setInt(1, level + 1);
-                            statement.setString(2, player.getUniqueId().toString());
-                            statement.executeUpdate();
-                            statement.close();
+                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1.0f, 1.0f);
 
-                            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+                            if (totalVotes + 1 == 3) {
+                                try (PreparedStatement statement1 = connection.prepareStatement("UPDATE votes SET " +
+                                        "last_vote=?, votes=? WHERE uuid=?")) {
+                                    statement1.setLong(1, System.currentTimeMillis());
+                                    statement1.setInt(2, totalVotes + 1);
+                                    statement1.setString(3, player.getUniqueId().toString());
+                                    statement1.executeUpdate();
 
-                            // Level up player's streak after 5 votes
-                            String dayString;
-                            int nextLevel = level + 1;
-                            if (nextLevel == 1) dayString = "day";
-                            else dayString = "days";
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
+                                            "%sYou've received a crate key- vote &d2 &7more times to level up your streak.",
+                                            Config.getPrefix()
+                                    )));
+                                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                                    Bukkit.getScheduler().runTask(Inferno.getInferno(), () -> Bukkit.dispatchCommand(
+                                            Bukkit.getConsoleSender(), Config.getString("reward")
+                                                    .replace("[player]", player.getName())
+                                    ));
+                                }
+                            } else if (totalVotes + 1 == 5) {
+                                try (PreparedStatement statement1 = connection.prepareStatement("UPDATE votes SET " +
+                                        "level=?, votes = 0 WHERE uuid=?")) {
+                                    statement1.setInt(1, streakLevel + 1);
+                                    statement1.setString(2, player.getUniqueId().toString());
+                                    statement1.executeUpdate();
 
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
-                                    Config.getString("chat.message"), Config.getPrefix(), (level + 1), dayString
-                            )));
-                        } else {
-                            statement = connection.prepareStatement("UPDATE inferno SET votes=? WHERE uuid=?");
-                            statement.setInt(1, votes + 1);
-                            statement.setString(2, player.getUniqueId().toString());
-                            statement.executeUpdate();
-                            statement.close();
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
+                                            "%sYou've maintained your streak, which is now &d%s&7 %s long- great work!",
+                                            Config.getPrefix(), (streakLevel + 1), Inferno.getDayString(streakLevel + 1)
+                                    )));
+                                    player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+                                }
+                            } else {
+                                try (PreparedStatement statement1 = connection.prepareStatement("UPDATE votes SET votes=? WHERE uuid=?")) {
+                                    statement1.setInt(1, totalVotes + 1);
+                                    statement1.setString(2, player.getUniqueId().toString());
+                                    statement1.executeUpdate();
+                                }
+                            }
                         }
-                        Inferno.getEconomy().depositPlayer(player, money);
-                    } else {
-                        Inferno.getInferno().getLogger().info(String.format("Can't find %s in streaks database.", username));
                     }
-                    connection.close();
-                } catch (SQLException e) {
-                    Inferno.getInferno().getLogger().warning("Error while connecting to database.");
-                    e.printStackTrace();
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        }.runTaskAsynchronously(Inferno.getInferno());
-    }
-
-    /**
-     * Returns a player's current streak level
-     *
-     * @param player Player object to check level for
-     */
-    private int getLevel(Player player) {
-        try {
-            Connection connection = Inferno.getHandler().open();
-            PreparedStatement statement = connection.prepareStatement("SELECT level FROM inferno WHERE uuid=?");
-            statement.setString(1, player.getUniqueId().toString());
-
-            final ResultSet result = statement.executeQuery();
-            if (result.next()) {
-                final int level = result.getInt(1);
-                result.close();
-                connection.close();
-                return level;
-            }
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        });
     }
 }

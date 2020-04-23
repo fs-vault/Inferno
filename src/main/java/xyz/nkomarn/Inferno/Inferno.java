@@ -2,95 +2,112 @@ package xyz.nkomarn.Inferno;
 
 import java.sql.PreparedStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
-import net.milkbowl.vault.economy.Economy;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.scheduler.BukkitRunnable;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import org.bukkit.Location;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.nkomarn.Inferno.command.SendVoteCommand;
 import xyz.nkomarn.Inferno.command.StreakCommand;
 import xyz.nkomarn.Inferno.listener.PlayerJoinListener;
 import xyz.nkomarn.Inferno.listener.VoteListener;
-import xyz.nkomarn.Inferno.placeholder.StreakPlaceholders;
 import xyz.nkomarn.Inferno.task.StreakTask;
-import xyz.nkomarn.Inferno.util.Streak;
+import xyz.nkomarn.Kerosene.data.LocalStorage;
 
 public class Inferno extends JavaPlugin {
     private static Inferno inferno;
-    private static SQLHandler handler;
-    private static Economy economy = null;
-
-    public static ArrayList<Streak> LEADERBOARD = new ArrayList<>();
+    public static Hologram HOLOGRAM;
 
     public void onEnable() {
         inferno = this;
         saveDefaultConfig();
-        loadDatabase();
+        loadStorage();
 
         getCommand("streak").setExecutor(new StreakCommand());
         getCommand("sendvote").setExecutor(new SendVoteCommand());
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new VoteListener(), this);
 
-        if (!initializeEconomy()) {
-            return;
-        }
+        HOLOGRAM = HologramsAPI.createHologram(this, new Location(
+                getServer().getWorld(getConfig().getString("hologram.world")),
+                getConfig().getInt("hologram.x") + 0.5,
+                getConfig().getInt("hologram.y") + 2,
+                getConfig().getInt("hologram.z")  + 0.5
+        ));
 
-        // Register placeholders
-        new StreakPlaceholders(this).register();
         Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(this,
-                new StreakTask(), 0L, 120 * 20);
+                new StreakTask(), 0L, 60 * 20);
     }
-    
-    public void onDisable() { }
-    
+
+    public void onDisable() {
+        HOLOGRAM.delete();
+    }
+
     public static Inferno getInferno() {
         return inferno;
     }
     
-    public static SQLHandler getHandler() {
-        return handler;
+    private void loadStorage() {
+        final String query = "CREATE TABLE IF NOT EXISTS votes (uuid CHAR(36) PRIMARY KEY, last_vote INTEGER NOT " +
+                "NULL DEFAULT '0', level UNSIGNED INTEGER(10) NOT NULL DEFAULT '0', votes INTEGER(10) NOT NULL DEFAULT '0');";
+
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+           try (Connection connection = LocalStorage.getConnection()) {
+               try (PreparedStatement statement = connection.prepareStatement(query)) {
+                   statement.execute();
+               }
+           } catch (SQLException e) {
+               e.printStackTrace();
+           }
+        });
     }
 
-    public static Economy getEconomy() {
-        return economy;
+    public static void createEntry(final Connection connection, final Player player) {
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO votes (uuid) VALUES (?)")) {
+            statement.setString(1, player.getUniqueId().toString());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
-    
-    private void loadDatabase() {
-        handler = new SQLHandler(getLogger(), "inferno", getDataFolder().getAbsolutePath());
-        new BukkitRunnable() {
-            public void run() {
-                try {
-                    final Connection connection = handler.open();
-                    if (connection == null) {
-                        Inferno.getInferno().getLogger().warning("Error while connecting to database.");
-                        return;
-                    }
 
-                    PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS inferno " +
-                            "(uuid CHAR(36) PRIMARY KEY, last_vote INTEGER NOT NULL DEFAULT '0', level UNSIGNED " +
-                            "INTEGER(10) NOT NULL DEFAULT '0', votes INTEGER(10) NOT NULL DEFAULT '0');");
-                    statement.executeUpdate();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
+    public static void resetStreak(final Connection connection, final Player player) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE votes SET votes=0, " +
+                "level=0, last_vote=? WHERE uuid=?")) {
+            statement.setLong(1, System.currentTimeMillis());
+            statement.setString(2, player.getUniqueId().toString());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int getStreakLevel(final Connection connection, final Player player) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT level FROM votes WHERE uuid=?")) {
+            statement.setString(1, player.getUniqueId().toString());
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    return result.getInt(1);
                 }
             }
-        }.runTaskAsynchronously(this);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
-    private boolean initializeEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().severe("Phase requires Vault to operate.");
-            getServer().getPluginManager().disablePlugin(this);
-        }
-        RegisteredServiceProvider<Economy> provider = getServer().getServicesManager()
-                .getRegistration(Economy.class);
-        if (provider == null) return false;
-        economy = provider.getProvider();
-        return true;
+    /**
+     * Decide whether "day" or "days" is the grammatically
+     * word for a given number of days.
+     * @param number The number of days.
+     * @return The correct string for the inputted amount of days.
+     */
+    public static String getDayString(final int number) {
+        if (number == 1) return "day";
+        else return "days";
     }
 }

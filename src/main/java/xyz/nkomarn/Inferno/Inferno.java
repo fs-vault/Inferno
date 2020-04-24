@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.nkomarn.Inferno.command.AddStreakCommand;
 import xyz.nkomarn.Inferno.command.SendVoteCommand;
 import xyz.nkomarn.Inferno.command.StreakCommand;
 import xyz.nkomarn.Inferno.listener.PlayerJoinListener;
@@ -28,6 +29,7 @@ public class Inferno extends JavaPlugin {
         loadStorage();
 
         getCommand("streak").setExecutor(new StreakCommand());
+        getCommand("addstreak").setExecutor(new AddStreakCommand());
         getCommand("sendvote").setExecutor(new SendVoteCommand());
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new VoteListener(), this);
@@ -76,8 +78,8 @@ public class Inferno extends JavaPlugin {
     }
 
     public static void resetStreak(final Connection connection, final Player player) {
-        try (PreparedStatement statement = connection.prepareStatement("UPDATE votes SET votes=0, " +
-                "level=0, last_vote=? WHERE uuid=?")) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE votes SET votes = 0, " +
+                "level = 0, last_vote=? WHERE uuid=?")) {
             statement.setLong(1, System.currentTimeMillis());
             statement.setString(2, player.getUniqueId().toString());
             statement.executeUpdate();

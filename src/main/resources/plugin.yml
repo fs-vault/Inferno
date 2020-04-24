@@ -10,9 +10,13 @@ depend: ['Kerosene', 'HolographicDisplays', 'Votifier']
 commands:
   streak:
     description: "View your voting streak."
+  addstreak:
+    description: "Adds streak levels to a player."
   sendvote:
     description: "Sends a fake vote with a username."
 
 permissions:
+  inferno.addstreak:
+    default: op
   inferno.sendvote:
     default: op

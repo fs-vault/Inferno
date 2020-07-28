@@ -9,8 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import xyz.nkomarn.Inferno.Inferno;
 import xyz.nkomarn.Inferno.util.Config;
-import xyz.nkomarn.Kerosene.data.LocalStorage;
-import xyz.nkomarn.Kerosene.util.EconomyUtil;
+import xyz.nkomarn.kerosene.util.Economy;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,7 +21,7 @@ public class VoteListener implements Listener {
     @EventHandler
     public void onVote(VotifierEvent event) {
         Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
-            try (Connection connection = LocalStorage.getConnection()) {
+            try (Connection connection = Inferno.STORAGE.getConnection()) {
                 Inferno.getInferno().getLogger().info(String.format("Received a vote from %s.", event.getVote().getUsername()));
                 final Player player = Bukkit.getServer().getPlayer(event.getVote().getUsername());
                 if (player == null) return;
@@ -41,7 +40,7 @@ public class VoteListener implements Listener {
                             if (daysSinceLastVote >= 2) Inferno.resetStreak(connection, player);
 
                             final long monetaryReward = (streakLevel * 5) + 10;
-                            EconomyUtil.deposit(player, monetaryReward);
+                            Economy.deposit(player, monetaryReward);
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
                                     "%sYou've received &d$%s &7for voting (&d%s/5&7 daily votes- streak level &d%s&7).",
                                     Config.getPrefix(), monetaryReward, (totalVotes + 1), streakLevel

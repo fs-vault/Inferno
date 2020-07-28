@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import xyz.nkomarn.Inferno.Inferno;
 import xyz.nkomarn.Inferno.util.Config;
-import xyz.nkomarn.Kerosene.data.LocalStorage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class StreakTask implements Runnable {
     @Override
     public void run() {
-        try (Connection connection = LocalStorage.getConnection()) {
+        try (Connection connection = Inferno.STORAGE.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement("SELECT uuid, last_vote FROM votes;")) {
                 try (ResultSet result = statement.executeQuery()) {
                     while (result.next()) {

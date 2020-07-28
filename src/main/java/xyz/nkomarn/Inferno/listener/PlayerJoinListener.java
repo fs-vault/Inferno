@@ -6,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import xyz.nkomarn.Inferno.Inferno;
-import xyz.nkomarn.Kerosene.data.LocalStorage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +19,7 @@ public class PlayerJoinListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
             final Player player = event.getPlayer();
 
-            try (Connection connection = LocalStorage.getConnection()) {
+            try (Connection connection = Inferno.STORAGE.getConnection()) {
                 try (PreparedStatement statement = connection.prepareStatement("SELECT last_vote, level FROM votes WHERE uuid=?")) {
                     statement.setString(1, player.getUniqueId().toString());
                     try (ResultSet result = statement.executeQuery()) {

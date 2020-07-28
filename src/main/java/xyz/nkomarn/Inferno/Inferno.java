@@ -17,15 +17,18 @@ import xyz.nkomarn.Inferno.command.StreakCommand;
 import xyz.nkomarn.Inferno.listener.PlayerJoinListener;
 import xyz.nkomarn.Inferno.listener.VoteListener;
 import xyz.nkomarn.Inferno.task.StreakTask;
-import xyz.nkomarn.Kerosene.data.LocalStorage;
+import xyz.nkomarn.kerosene.data.db.LocalStorage;
 
 public class Inferno extends JavaPlugin {
+
     private static Inferno inferno;
     public static Hologram HOLOGRAM;
+    public static LocalStorage STORAGE;
 
     public void onEnable() {
         inferno = this;
         saveDefaultConfig();
+        STORAGE = new LocalStorage("inferno");
         loadStorage();
 
         getCommand("streak").setExecutor(new StreakCommand());
@@ -58,7 +61,7 @@ public class Inferno extends JavaPlugin {
                 "NULL DEFAULT '0', level UNSIGNED INTEGER(10) NOT NULL DEFAULT '0', votes INTEGER(10) NOT NULL DEFAULT '0');";
 
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-           try (Connection connection = LocalStorage.getConnection()) {
+           try (Connection connection = STORAGE.getConnection()) {
                try (PreparedStatement statement = connection.prepareStatement(query)) {
                    statement.execute();
                }

@@ -1,7 +1,5 @@
 package xyz.nkomarn.Inferno.command;
 
-import com.vexsoftware.votifier.model.Vote;
-import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -9,7 +7,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import xyz.nkomarn.Inferno.Inferno;
 import xyz.nkomarn.Inferno.util.Config;
-import xyz.nkomarn.Kerosene.data.LocalStorage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,7 +28,7 @@ public class AddStreakCommand implements CommandExecutor {
         } else {
             final int levels = Integer.parseInt(args[1]);
             Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
-                try (Connection connection = LocalStorage.getConnection()) {
+                try (Connection connection = Inferno.STORAGE.getConnection()) {
                     try (PreparedStatement statement = connection.prepareStatement("UPDATE votes SET level = level + ? " +
                             "WHERE uuid = ?;")) {
                         statement.setInt(1, levels);

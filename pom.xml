@@ -59,9 +59,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.Firestarter</groupId>
+            <groupId>xyz.nkomarn</groupId>
             <artifactId>Kerosene</artifactId>
-            <version>57760c5ee4</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>com.vexsoftware</groupId>

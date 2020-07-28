@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
 import xyz.nkomarn.Inferno.Inferno;
 import xyz.nkomarn.Inferno.util.Config;
-import xyz.nkomarn.Kerosene.data.LocalStorage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -19,7 +18,7 @@ public class StreakCommand implements CommandExecutor {
 
         final Player player = (Player) sender;
         Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
-            try (Connection connection = LocalStorage.getConnection()) {
+            try (Connection connection = Inferno.STORAGE.getConnection()) {
                 final int streakLevel = Inferno.getStreakLevel(connection, player);
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
                         "%sYour voting streak is &d%s&7 %s long.",

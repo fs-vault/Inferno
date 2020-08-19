@@ -18,7 +18,7 @@ public class StreakCommand implements CommandExecutor {
 
         final Player player = (Player) sender;
         Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
-            try (Connection connection = Inferno.STORAGE.getConnection()) {
+            try (Connection connection = Inferno.getStorage().getConnection()) {
                 final int streakLevel = Inferno.getStreakLevel(connection, player);
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(
                         "%sYour voting streak is &d%s&7 %s long.",

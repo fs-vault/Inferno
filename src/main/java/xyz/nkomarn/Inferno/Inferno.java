@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import xyz.nkomarn.Inferno.command.AddStreakCommand;
 import xyz.nkomarn.Inferno.command.SendVoteCommand;
 import xyz.nkomarn.Inferno.command.StreakCommand;
@@ -21,13 +22,14 @@ import xyz.nkomarn.kerosene.data.db.LocalStorage;
 
 public class Inferno extends JavaPlugin {
 
-    private static Inferno inferno;
-    public static Hologram HOLOGRAM;
-    public static LocalStorage STORAGE;
+    private static Inferno INFERNO;
+    private static LocalStorage STORAGE;
+    private static Hologram HOLOGRAM;
 
     public void onEnable() {
-        inferno = this;
+        INFERNO = this;
         saveDefaultConfig();
+
         STORAGE = new LocalStorage("inferno");
         loadStorage();
 
@@ -52,10 +54,18 @@ public class Inferno extends JavaPlugin {
         HOLOGRAM.delete();
     }
 
-    public static Inferno getInferno() {
-        return inferno;
+    public static @NotNull Inferno getInferno() {
+        return INFERNO;
     }
-    
+
+    public static @NotNull LocalStorage getStorage() {
+        return STORAGE;
+    }
+
+    public static @NotNull Hologram getLeaderboard() {
+        return HOLOGRAM;
+    }
+
     private void loadStorage() {
         final String query = "CREATE TABLE IF NOT EXISTS votes (uuid CHAR(36) PRIMARY KEY, last_vote INTEGER NOT " +
                 "NULL DEFAULT '0', level UNSIGNED INTEGER(10) NOT NULL DEFAULT '0', votes INTEGER(10) NOT NULL DEFAULT '0');";
@@ -112,7 +122,6 @@ public class Inferno extends JavaPlugin {
      * @return The correct string for the inputted amount of days.
      */
     public static String getDayString(final int number) {
-        if (number == 1) return "day";
-        else return "days";
+        return number == 1 ? "day" : "days";
     }
 }

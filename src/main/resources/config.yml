@@ -4,7 +4,7 @@ chat:
 reward: "crate give p Vote 1 [player]"
 
 hologram:
-  entry: "&d#%s &8- &7%s: &a%s"
+  entry: "&d#%s &7- &f%s: &a%s"
   world: "world"
   x: 0
   y: 62

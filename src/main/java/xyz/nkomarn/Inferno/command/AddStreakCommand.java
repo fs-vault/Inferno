@@ -28,7 +28,7 @@ public class AddStreakCommand implements CommandExecutor {
         } else {
             final int levels = Integer.parseInt(args[1]);
             Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
-                try (Connection connection = Inferno.STORAGE.getConnection()) {
+                try (Connection connection = Inferno.getStorage().getConnection()) {
                     try (PreparedStatement statement = connection.prepareStatement("UPDATE votes SET level = level + ? " +
                             "WHERE uuid = ?;")) {
                         statement.setInt(1, levels);

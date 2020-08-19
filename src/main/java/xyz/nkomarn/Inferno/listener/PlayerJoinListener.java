@@ -19,7 +19,7 @@ public class PlayerJoinListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
             final Player player = event.getPlayer();
 
-            try (Connection connection = Inferno.STORAGE.getConnection()) {
+            try (Connection connection = Inferno.getStorage().getConnection()) {
                 try (PreparedStatement statement = connection.prepareStatement("SELECT last_vote, level FROM votes WHERE uuid=?")) {
                     statement.setString(1, player.getUniqueId().toString());
                     try (ResultSet result = statement.executeQuery()) {

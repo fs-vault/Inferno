@@ -21,7 +21,7 @@ public class VoteListener implements Listener {
     @EventHandler
     public void onVote(VotifierEvent event) {
         Bukkit.getScheduler().runTaskAsynchronously(Inferno.getInferno(), () -> {
-            try (Connection connection = Inferno.STORAGE.getConnection()) {
+            try (Connection connection = Inferno.getStorage().getConnection()) {
                 Inferno.getInferno().getLogger().info(String.format("Received a vote from %s.", event.getVote().getUsername()));
                 final Player player = Bukkit.getServer().getPlayer(event.getVote().getUsername());
                 if (player == null) return;

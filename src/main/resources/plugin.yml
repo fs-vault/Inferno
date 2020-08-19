@@ -1,10 +1,10 @@
 name: Inferno
-version: 2.0
+version: 2.1
 author: TechToolbox (@nkomarn)
-main: xyz.nkomarn.Inferno.Inferno
+main: com.firestartermc.inferno.Inferno
 description: A vote listener designed to encourage people to consistently vote.
 website: https://firestartermc.com/opensource
-api-version: 1.15
+api-version: 1.16
 depend: ['Kerosene', 'HolographicDisplays', 'Votifier']
 
 commands:
@@ -12,8 +12,10 @@ commands:
     description: "View your voting streak."
   addstreak:
     description: "Adds streak levels to a player."
+    permission: "inferno.addstreak"
   sendvote:
     description: "Sends a fake vote with a username."
+    permission: "inferno.sendvote"
 
 permissions:
   inferno.addstreak:

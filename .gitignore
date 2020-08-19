@@ -29,3 +29,6 @@ target/
 /.settings/
 /.project
 /.classpath
+/gradle/wrapper/gradle-wrapper.jar
+/.gradle
+/build

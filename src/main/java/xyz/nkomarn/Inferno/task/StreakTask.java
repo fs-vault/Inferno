@@ -1,7 +1,11 @@
 package xyz.nkomarn.Inferno.task;
 
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import xyz.nkomarn.Inferno.Inferno;
 import xyz.nkomarn.Inferno.util.Config;
 
@@ -11,50 +15,48 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StreakTask implements Runnable {
+
+    private static final ItemStack FLOATING_ITEM = new ItemStack(Material.PAPER, 1);
+
     @Override
     public void run() {
-        try (Connection connection = Inferno.STORAGE.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT uuid, last_vote FROM votes;")) {
-                try (ResultSet result = statement.executeQuery()) {
-                    while (result.next()) {
-                        if (TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() -
-                                result.getLong(2)) >= 2) {
-                            try (PreparedStatement statement1 = connection.prepareStatement("UPDATE votes SET level=0, " +
-                                    "votes=0, last_vote=? WHERE uuid=?")) {
-                                statement1.setLong(1, System.currentTimeMillis());
-                                statement1.setString(2, result.getString(1));
-                                statement1.executeUpdate();
-                            }
-                        }
-                    }
+        try {
+            Connection connection = Inferno.getStorage().getConnection();
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM votes WHERE ? - last_vote >= 172800000;");
+            statement.setLong(1, System.currentTimeMillis());
+            statement.execute();
+
+            ArrayList<String> leaderboard = new ArrayList<>();
+            AtomicInteger index = new AtomicInteger();
+            PreparedStatement statement1 = connection.prepareStatement("SELECT uuid, level, votes FROM votes ORDER BY level DESC LIMIT 5;");
+            ResultSet result = statement1.executeQuery();
+
+            try (connection; statement1; result) {
+                while (result.next()) {
+                    leaderboard.add(ChatColor.translateAlternateColorCodes('&', String.format(
+                            Config.getString("hologram.entry"), index.incrementAndGet(),
+                            Bukkit.getOfflinePlayer(UUID.fromString(result.getString(1))).getName(), result.getInt(2)
+                    )));
                 }
             }
 
-            final ArrayList<String> lines = new ArrayList<>();
-            try (PreparedStatement statement = connection.prepareStatement("SELECT uuid, level, votes FROM votes " +
-                    "ORDER BY level DESC LIMIT 5;")) {
-                try (ResultSet result = statement.executeQuery()) {
-                    int i = 1;
-                    while (result.next()) {
-                        lines.add(ChatColor.translateAlternateColorCodes('&', String.format(
-                                Config.getString("hologram.entry"), i++, Bukkit.getOfflinePlayer(UUID
-                                        .fromString(result.getString(1))).getName(), result.getInt(2)
-                        )));
-                    }
-                }
-            }
-
-            Bukkit.getScheduler().runTask(Inferno.getInferno(), () -> {
-                Inferno.HOLOGRAM.clearLines();
-                Inferno.HOLOGRAM.appendTextLine(ChatColor.translateAlternateColorCodes('&', "&d&lTop Vote Streaks"));
-                lines.forEach(line -> Inferno.HOLOGRAM.appendTextLine(ChatColor.translateAlternateColorCodes('&', line)));
-                Inferno.HOLOGRAM.appendTextLine(ChatColor.translateAlternateColorCodes('&', "&e/vote"));
-            });
+            updateLeaderboard(leaderboard);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void updateLeaderboard(@NotNull ArrayList<String> lines) {
+        Bukkit.getScheduler().runTask(Inferno.getInferno(), () -> {
+            Hologram leaderboard = Inferno.getLeaderboard();
+            leaderboard.clearLines();
+            leaderboard.appendItemLine(FLOATING_ITEM);
+            leaderboard.appendTextLine(ChatColor.LIGHT_PURPLE + ChatColor.BOLD.toString() + "Top Vote Streaks");
+            lines.forEach(line -> Inferno.getLeaderboard().appendTextLine(ChatColor.translateAlternateColorCodes('&', line)));
+            leaderboard.appendTextLine(ChatColor.YELLOW + "/vote");
+        });
     }
 }

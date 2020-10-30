@@ -1,11 +1,20 @@
-chat:
-  prefix: "&d&lVotes: &7"
-
+link: "https://git.io/JfeSI"
 reward: "crate give p Vote 1 [player]"
-
 hologram:
   entry: "&d#%s &7- &f%s: &a%s"
   world: "world"
   x: 0
   y: 62
   z: 0
+
+voteshop:
+  rewards:
+    1:
+      name: "&#ffed24&lVOTE KEY"
+      item: CAMPFIRE
+      commands:
+        - "givekey [player] vote 1"
+      messages:
+        - "Purchased vote key! Woo!"
+      tokens: 3
+      slot: 24

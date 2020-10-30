@@ -1,24 +1,24 @@
-name: Inferno
-version: 2.1
-author: TechToolbox (@nkomarn)
-main: com.firestartermc.inferno.Inferno
-description: A vote listener designed to encourage people to consistently vote.
-website: https://firestartermc.com/opensource
-api-version: 1.16
-depend: ['Kerosene', 'HolographicDisplays', 'Votifier']
+name: "Inferno"
+description: "A vote listener designed to encourage people to consistently vote."
+main: "com.firestartermc.inferno.Inferno"
+author: "Firestarter Minecraft Servers"
+website: "https://firestartermc.com"
+version: "1.2"
+api-version: "1.16"
+
+depend:
+  - "Kerosene"
+  - "HolographicDisplays"
+  - "Votifier"
 
 commands:
+  inferno:
+    description: "Base Inferno administrative command."
+    usage: "/<command> <addstreak/addtokens/sendvote>"
+  vote:
+    description: "Vote for the server."
   streak:
-    description: "View your voting streak."
-  addstreak:
-    description: "Adds streak levels to a player."
-    permission: "inferno.addstreak"
-  sendvote:
-    description: "Sends a fake vote with a username."
-    permission: "inferno.sendvote"
-
-permissions:
-  inferno.addstreak:
-    default: op
-  inferno.sendvote:
-    default: op
+    description: "View your current voting streak."
+  voteshop:
+    description: "Opens the voteshop."
+    aliases: ["rewards"]

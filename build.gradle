@@ -5,6 +5,8 @@ plugins {
 group 'com.firestartermc'
 version '2.1'
 
+sourceCompatibility = 14
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -20,8 +22,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.destroystokyo.paper:paper:1.16.1-R0.1-SNAPSHOT'
-    implementation 'xyz.nkomarn:Kerosene:4.0'
-    implementation 'com.vexsoftware:nuvotifier-universal:2.6.0'
-    implementation 'com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.3.2'
+    compileOnly 'com.destroystokyo.paper:paper-api:1.16.3-R0.1-SNAPSHOT'
+    compileOnly 'com.firestartermc:Kerosene:5.0'
+    compileOnly 'com.vexsoftware:nuvotifier-universal:2.6.0'
+    compileOnly 'com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.3.2'
 }

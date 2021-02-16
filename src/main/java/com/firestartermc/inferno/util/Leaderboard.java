@@ -1,6 +1,7 @@
 package com.firestartermc.inferno.util;
 
 import com.firestartermc.inferno.Inferno;
+import com.firestartermc.kerosene.util.MessageUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import org.bukkit.Bukkit;
@@ -68,7 +69,7 @@ public class Leaderboard extends BukkitRunnable {
             Bukkit.getScheduler().runTask(inferno, () -> {
                 hologram.clearLines();
                 hologram.appendItemLine(itemStack);
-                hologram.appendTextLine(ChatColor.LIGHT_PURPLE + ChatColor.BOLD.toString() + "Top Vote Streaks");
+                hologram.appendTextLine(MessageUtils.formatColors("&d&lTOP VOTE STREAKS", true));
                 leaderboard.forEach(line -> hologram.appendTextLine(ChatColor.translateAlternateColorCodes('&', line)));
                 hologram.appendTextLine(ChatColor.YELLOW + "/vote");
             });

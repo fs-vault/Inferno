@@ -31,7 +31,7 @@ public class StreakCommand implements CommandExecutor {
             return true;
         }
 
-        player.sendMessage(inferno.getPrefix() + MessageUtils.formatColors("Your vote streak is &#f779ed" + data.getStreak() + " " + getDayString(data.getStreak()) + " &#fcdcfalong.", true));
+        player.sendMessage(inferno.getPrefix() + MessageUtils.formatColors("Your vote streak is " + data.getStreak() + " " + getDayString(data.getStreak()) + " long.", true));
         return true;
     }
 

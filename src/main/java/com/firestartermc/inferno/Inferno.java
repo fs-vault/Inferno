@@ -16,7 +16,6 @@ public class Inferno extends JavaPlugin {
 
     private Leaderboard leaderboard;
     private VoteShop voteShop;
-
     private Cache cache;
 
     @Override
@@ -55,7 +54,7 @@ public class Inferno extends JavaPlugin {
     }
 
     public String getPrefix() {
-        return MessageUtils.formatColors("&#f779ed&lVOTES: &#fcdcfa", true);
+        return MessageUtils.formatColors("&#fcc295\u2BEA &lVOTE: &f", true);
     }
 
     public Cache getCache() {

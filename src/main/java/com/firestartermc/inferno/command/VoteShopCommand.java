@@ -3,6 +3,7 @@ package com.firestartermc.inferno.command;
 import com.firestartermc.inferno.Inferno;
 import com.firestartermc.inferno.menu.VoteShopMenu;
 import com.firestartermc.kerosene.util.Constants;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -28,7 +29,9 @@ public class VoteShopCommand implements TabExecutor {
             return true;
         }
 
-        new VoteShopMenu(inferno, (Player) sender);
+        var player = (Player) sender;
+        new VoteShopMenu(inferno, player);
+        player.playSound(player.getLocation(), Sound.BLOCK_CONDUIT_ACTIVATE, 0.6f, 1.2f);
         return true;
     }
 

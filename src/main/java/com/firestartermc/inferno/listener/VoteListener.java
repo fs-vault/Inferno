@@ -56,13 +56,15 @@ public class VoteListener implements Listener {
         data.setTokens(data.getTokens() + 1);
 
         player.playSound(player.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1.0f, 1.0f);
-        player.sendMessage(inferno.getPrefix() + MessageUtils.formatColors("Received &#f779ed$" + money + " &#fcdcfaand &#f779ed1 token&e &7(" + data.getVotes() + "/5 daily votes).", true));
+        player.sendMessage(inferno.getPrefix() + MessageUtils.formatColors("Received &#ffdac7$" + money + " &fand &#ffdac71 token &7(" + data.getVotes() + "/5 daily votes)", true));
 
         if (data.getVotes() == 5) {
             data.setVotes(0);
             data.setStreak(data.getStreak() + 1);
-            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
-            player.sendMessage(inferno.getPrefix() + "Maintained your streak, which is now " + data.getStreak() + " " + getDayString(data.getStreak()) + " long.");
+            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.4f);
+            player.sendMessage(inferno.getPrefix() + MessageUtils.formatColors("Maintained your streak, which is now "
+                    + data.getStreak() + " " + getDayString(data.getStreak()) + " long. Check out &#ffdac7/rewards&f "
+                    + "to redeem your vote tokens!", true));
         }
     }
 

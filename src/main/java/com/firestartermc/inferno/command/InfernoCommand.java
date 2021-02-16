@@ -49,9 +49,17 @@ public class InfernoCommand implements TabExecutor {
         if (args.length < 3) {
             return false;
         }
-        // TODO online players only
 
-        /*var uuid = Bukkit.getOfflinePlayer(args[1]).getUniqueId();
+        var player = Bukkit.getPlayer(args[1]);
+        if (player == null) {
+            return false;
+        }
+
+        var data = inferno.getCache().getData(player);
+        if (data == null) {
+            return false;
+        }
+
         int levels;
         if (!NumberUtils.isNumber(args[2])) {
             return false;
@@ -59,16 +67,8 @@ public class InfernoCommand implements TabExecutor {
             levels = Integer.parseInt(args[2]);
         }
 
-        var data = inferno.getCache().getData(player);
-
-        inferno.getStreaks().getStreak(uuid)
-                .thenApply(level -> inferno.getStreaks().setStreak(uuid, level + levels))
-                .thenAccept(a -> sender.sendMessage(ChatColor.GREEN + "Added " + levels + " streak levels."))
-                .exceptionally(throwable -> {
-                    sender.sendMessage(ChatColor.RED + "Failed to update streak. Check console.");
-                    throwable.printStackTrace();
-                    return null;
-                });*/
+        data.setStreak(data.getStreak() + levels);
+        sender.sendMessage(ChatColor.GREEN + "Added " + levels + " streak levels.");
         return true;
     }
 

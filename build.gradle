@@ -26,4 +26,5 @@ dependencies {
     compileOnly 'com.firestartermc:Kerosene:5.0'
     compileOnly 'com.vexsoftware:nuvotifier-universal:2.6.0'
     compileOnly 'com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.3.2'
+    compileOnly 'net.brcdev:ShopGUIPlus:1.49.1'
 }

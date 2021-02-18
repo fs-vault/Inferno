@@ -10,6 +10,7 @@ depend:
   - "Kerosene"
   - "HolographicDisplays"
   - "Votifier"
+  - "ShopGUIPlus"
 
 commands:
   inferno:
@@ -19,6 +20,3 @@ commands:
     description: "Vote for the server."
   streak:
     description: "View your current voting streak."
-  voteshop:
-    description: "Opens the voteshop."
-    aliases: ["rewards"]

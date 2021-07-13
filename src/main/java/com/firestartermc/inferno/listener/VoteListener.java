@@ -3,16 +3,20 @@ package com.firestartermc.inferno.listener;
 import com.firestartermc.inferno.Inferno;
 import com.firestartermc.kerosene.Kerosene;
 import com.firestartermc.kerosene.economy.EconomyWrapper;
+import com.firestartermc.kerosene.item.BookBuilder;
+import com.firestartermc.kerosene.item.ItemBuilder;
 import com.firestartermc.kerosene.util.ConcurrentUtils;
 import com.firestartermc.kerosene.util.Constants;
 import com.firestartermc.kerosene.util.MessageUtils;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.meta.BookMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -65,11 +69,27 @@ public class VoteListener implements Listener {
             player.sendMessage(inferno.getPrefix() + MessageUtils.formatColors("Maintained your streak, which is now "
                     + data.getStreak() + " " + getDayString(data.getStreak()) + " long. Check out &#ffdac7/rewards&f "
                     + "to redeem your vote tokens!", true));
+
+            displayThankYou(player);
         }
     }
 
     private String getDayString(int level) {
         return level == 1 ? "day" : "days";
+    }
+
+    private void displayThankYou(@NotNull Player player) {
+        var item = ItemBuilder.of(Material.WRITTEN_BOOK).build();
+        var meta = (BookMeta) item.getItemMeta();
+        var page = inferno.getConfig().getStringList("thank-you-book").stream()
+                .map(line -> MessageUtils.formatColors(line, true))
+                .toArray(String[]::new);
+
+        meta.addPage(page);
+        meta.setTitle("thx for voting uwu");
+        meta.setAuthor("Firestarter Staff");
+        item.setItemMeta(meta);
+        player.openBook(item);
     }
 
     private void giveReward(@NotNull String playerName) {
